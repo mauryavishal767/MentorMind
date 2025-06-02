@@ -1,10 +1,5 @@
-import { Button } from "@/components/ui/button";
-    
-export default function Home() {
-  return (
-    <div>
-        <h1>Mentor Mind</h1>
-        <Button variant="destructive">Click me!</Button>
-    </div>
-  );
+import { redirect } from "next/navigation"
+
+export default function HomePage() {
+  redirect("/auth/login")
 }
