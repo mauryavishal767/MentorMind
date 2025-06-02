@@ -34,7 +34,7 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       })
@@ -43,8 +43,11 @@ export function LoginForm() {
         throw error
       }
 
-      router.push("/dashboard")
-      toast.success("Logged in successfully")
+      if (authData?.session) {
+        router.refresh() // Force a router refresh to update the session
+        router.push("/dashboard")
+        toast.success("Logged in successfully")
+      }
     } catch (error) {
       toast.error("Invalid email or password")
     } finally {
