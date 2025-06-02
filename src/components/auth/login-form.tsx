@@ -52,11 +52,18 @@ export function LoginForm() {
         console.log("Session obtained, waiting before redirect")
         // Wait for session to be set
         await new Promise(resolve => setTimeout(resolve, 500))
-        console.log("Refreshing router")
-        router.refresh()
-        console.log("Redirecting to dashboard")
-        router.push("/dashboard")
-        toast.success("Logged in successfully")
+        
+        try {
+          console.log("Refreshing router")
+          router.refresh()
+          
+          console.log("Attempting navigation to dashboard")
+          window.location.href = '/dashboard'
+          toast.success("Logged in successfully")
+        } catch (navigationError) {
+          console.error("Navigation error:", navigationError)
+          toast.error("Error during navigation. Please try again.")
+        }
       } else {
         console.log("No session in auth response")
         toast.error("Login failed - no session returned")
