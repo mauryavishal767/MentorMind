@@ -57,8 +57,8 @@ export function LoginForm() {
           console.log("Refreshing router")
           router.refresh()
           
-          console.log("Attempting navigation to dashboard")
-          window.location.href = '/dashboard'
+          console.log("Navigating to dashboard")
+          router.push("/dashboard")
           toast.success("Logged in successfully")
         } catch (navigationError) {
           console.error("Navigation error:", navigationError)
