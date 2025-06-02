@@ -3,7 +3,6 @@ import Link from "next/link"
 import { RegisterForm } from "@/components/auth/register-form"
 import { LoginButtons } from "@/components/auth/login-buttons"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 
 export const metadata: Metadata = {
   title: "Register",
