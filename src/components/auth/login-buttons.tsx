@@ -1,3 +1,5 @@
+'use client'
+
 import { signInWithProvider } from '@/lib/auth/auth-service'
 import { Button } from '@/components/ui/button'
 
