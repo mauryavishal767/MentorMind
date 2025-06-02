@@ -3,38 +3,87 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req: request, res })
-  const { data: { session } } = await supabase.auth.getSession()
+  try {
+    // Create middleware Supabase client
+    const res = NextResponse.next()
+    const supabase = createMiddlewareClient({ req: request, res })
 
-  // Protect dashboard routes
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    if (!session) {
-      const redirectUrl = new URL('/auth/login', request.url)
-      redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
-      return NextResponse.redirect(redirectUrl)
+    // Get session and log details
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError) {
+      console.error('Session error in middleware:', sessionError)
+      throw sessionError
     }
+
+    // Log session state for debugging
+    console.log('Middleware session state:', {
+      path: request.nextUrl.pathname,
+      hasSession: !!session,
+      userId: session?.user?.id,
+      timestamp: new Date().toISOString()
+    })
+
+    // Protect dashboard routes
+    if (request.nextUrl.pathname.startsWith('/dashboard')) {
+      if (!session) {
+        console.log('Unauthorized dashboard access attempt:', {
+          path: request.nextUrl.pathname,
+          timestamp: new Date().toISOString()
+        })
+
+        const redirectUrl = new URL('/auth/login', request.url)
+        redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
+        return NextResponse.redirect(redirectUrl)
+      }
+
+      console.log('Authorized dashboard access:', {
+        userId: session.user.id,
+        path: request.nextUrl.pathname,
+        timestamp: new Date().toISOString()
+      })
+
+      return res
+    }
+
+    // Redirect authenticated users away from auth pages
+    if (request.nextUrl.pathname.startsWith('/auth')) {
+      if (session) {
+        console.log('Authenticated user accessing auth page - redirecting:', {
+          userId: session.user.id,
+          path: request.nextUrl.pathname,
+          timestamp: new Date().toISOString()
+        })
+
+        const redirectTo = request.nextUrl.searchParams.get('redirect') || '/dashboard'
+        return NextResponse.redirect(new URL(redirectTo, request.url))
+      }
+      return res
+    }
+
+    // Handle root path
+    if (request.nextUrl.pathname === '/') {
+      if (session) {
+        console.log('Authenticated user at root - redirecting to dashboard:', {
+          userId: session.user.id,
+          timestamp: new Date().toISOString()
+        })
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+
+      console.log('Unauthenticated user at root - redirecting to login:', {
+        timestamp: new Date().toISOString()
+      })
+      return NextResponse.redirect(new URL('/auth/login', request.url))
+    }
+
     return res
-  }
-
-  // Redirect authenticated users away from auth pages
-  if (request.nextUrl.pathname.startsWith('/auth')) {
-    if (session) {
-      const redirectTo = request.nextUrl.searchParams.get('redirect') || '/dashboard'
-      return NextResponse.redirect(new URL(redirectTo, request.url))
-    }
-    return res
-  }
-
-  // Handle root path
-  if (request.nextUrl.pathname === '/') {
-    if (session) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
+  } catch (error) {
+    console.error('Middleware error:', error)
+    
+    // In case of error, redirect to login for safety
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
-
-  return res
 }
 
 export const config = {
