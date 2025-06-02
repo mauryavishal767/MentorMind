@@ -49,9 +49,23 @@ export function LoginForm() {
       console.log("Auth response:", authData)
 
       if (authData?.session) {
-        console.log("Session obtained, waiting before redirect")
-        // Wait for session to be set
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Log detailed session information
+        console.log("Session details:", {
+          id: authData.session.access_token,
+          user: authData.session.user,
+          expires: authData.session.expires_at,
+        })
+
+        // Verify session is stored in Supabase
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) {
+          console.error("Session verification failed:", sessionError)
+          throw sessionError
+        }
+        console.log("Session verified:", sessionData)
+
+        // Wait for session to be fully established
+        await new Promise(resolve => setTimeout(resolve, 1000))
         
         try {
           console.log("Refreshing router")
