@@ -1,26 +1,16 @@
-"use client"
-
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/use-auth"
+import { SidebarNav } from "@/components/dashboard/sidebar-nav"
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { user, loading } = useAuth()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/auth/login")
-    }
-  }, [user, loading, router])
-
-  if (loading) {
-    return <div>Loading...</div>
-  }
-
-  return <>{children}</>
+  return (
+    <div className="flex min-h-screen">
+      <SidebarNav />
+      <main className="flex-1 overflow-y-auto">
+        {children}
+      </main>
+    </div>
+  )
 }
