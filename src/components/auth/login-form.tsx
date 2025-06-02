@@ -31,26 +31,38 @@ export function LoginForm() {
   })
 
   async function onSubmit(data: LoginValues) {
+    console.log("Login attempt started", data.email)
     setIsLoading(true)
 
     try {
+      console.log("Calling Supabase auth.signInWithPassword")
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       })
 
       if (error) {
+        console.error("Login error:", error)
         throw error
       }
 
+      console.log("Auth response:", authData)
+
       if (authData?.session) {
+        console.log("Session obtained, waiting before redirect")
         // Wait for session to be set
         await new Promise(resolve => setTimeout(resolve, 500))
+        console.log("Refreshing router")
         router.refresh()
+        console.log("Redirecting to dashboard")
         router.push("/dashboard")
         toast.success("Logged in successfully")
+      } else {
+        console.log("No session in auth response")
+        toast.error("Login failed - no session returned")
       }
     } catch (error) {
+      console.error("Login error:", error)
       toast.error("Invalid email or password")
     } finally {
       setIsLoading(false)
