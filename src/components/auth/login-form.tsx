@@ -43,22 +43,11 @@ export function LoginForm() {
       if (error) throw error
 
       if (authData?.session) {
-        // Verify session is properly stored
-        const { data: verifySession } = await supabase.auth.getSession()
-        
-        if (!verifySession?.session) {
-          throw new Error("Session verification failed")
-        }
-
-        // Refresh server-side session data
-        await fetch('/auth/refresh', { method: 'POST' })
-        
         router.refresh()
-        router.push('/dashboard')
+        router.push("/dashboard")
         toast.success("Logged in successfully")
       }
     } catch (error) {
-      console.error("Login error:", error)
       toast.error("Invalid email or password")
     } finally {
       setIsLoading(false)
