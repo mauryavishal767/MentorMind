@@ -3,27 +3,30 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next()
-  const supabase = createMiddlewareClient({ req: request, res: response })
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req: request, res })
   const { data: { session } } = await supabase.auth.getSession()
 
   // Protect dashboard routes
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
     if (!session) {
-      return NextResponse.redirect(new URL('/auth/login', request.url))
+      const redirectUrl = new URL('/auth/login', request.url)
+      redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
+      return NextResponse.redirect(redirectUrl)
     }
-    return response
+    return res
   }
 
   // Redirect authenticated users away from auth pages
   if (request.nextUrl.pathname.startsWith('/auth')) {
     if (session) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      const redirectTo = request.nextUrl.searchParams.get('redirect') || '/dashboard'
+      return NextResponse.redirect(new URL(redirectTo, request.url))
     }
-    return response
+    return res
   }
 
-  // Redirect root to dashboard if authenticated, otherwise to login
+  // Handle root path
   if (request.nextUrl.pathname === '/') {
     if (session) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
@@ -31,7 +34,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
-  return response
+  return res
 }
 
 export const config = {

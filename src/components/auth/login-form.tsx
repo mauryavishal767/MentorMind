@@ -44,7 +44,9 @@ export function LoginForm() {
       }
 
       if (authData?.session) {
-        router.refresh() // Force a router refresh to update the session
+        // Wait for session to be set
+        await new Promise(resolve => setTimeout(resolve, 500))
+        router.refresh()
         router.push("/dashboard")
         toast.success("Logged in successfully")
       }
