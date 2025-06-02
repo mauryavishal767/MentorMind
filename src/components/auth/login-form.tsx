@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { supabase } from "@/lib/supabase/config"
+import { createClient } from "@/lib/supabase/config"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -21,6 +21,7 @@ type LoginValues = z.infer<typeof loginSchema>
 export function LoginForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const supabase = createClient()
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -31,56 +32,30 @@ export function LoginForm() {
   })
 
   async function onSubmit(data: LoginValues) {
-    console.log("Login attempt started", data.email)
     setIsLoading(true)
 
     try {
-      console.log("Calling Supabase auth.signInWithPassword")
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       })
 
-      if (error) {
-        console.error("Login error:", error)
-        throw error
-      }
-
-      console.log("Auth response:", authData)
+      if (error) throw error
 
       if (authData?.session) {
-        // Log detailed session information
-        console.log("Session details:", {
-          id: authData.session.access_token,
-          user: authData.session.user,
-          expires: authData.session.expires_at,
-        })
-
-        // Verify session is stored in Supabase
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-        if (sessionError) {
-          console.error("Session verification failed:", sessionError)
-          throw sessionError
-        }
-        console.log("Session verified:", sessionData)
-
-        // Wait for session to be fully established
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Verify session is properly stored
+        const { data: verifySession } = await supabase.auth.getSession()
         
-        try {
-          console.log("Refreshing router")
-          router.refresh()
-          
-          console.log("Navigating to dashboard")
-          router.push("/dashboard")
-          toast.success("Logged in successfully")
-        } catch (navigationError) {
-          console.error("Navigation error:", navigationError)
-          toast.error("Error during navigation. Please try again.")
+        if (!verifySession?.session) {
+          throw new Error("Session verification failed")
         }
-      } else {
-        console.log("No session in auth response")
-        toast.error("Login failed - no session returned")
+
+        // Refresh server-side session data
+        await fetch('/auth/refresh', { method: 'POST' })
+        
+        router.refresh()
+        router.push('/dashboard')
+        toast.success("Logged in successfully")
       }
     } catch (error) {
       console.error("Login error:", error)
