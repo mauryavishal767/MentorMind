@@ -1,10 +1,9 @@
-import { Button } from "@/components/ui/button";
-    
+import ClientComponent from "@/components/ui/ClientComponent";
+
 export default function Home() {
-  return (
-    <div>
-        <h1>Mentor Mind</h1>
-        <Button variant="destructive">Click me!</Button>
-    </div>
-  );
+    return (
+        <main className="flex min-h-screen flex-col items-center justify-between p-24">
+            <ClientComponent />
+        </main>
+    );
 }
