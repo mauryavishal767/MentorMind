@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { createClient } from "@/lib/supabase/config"
+// import { createClient } from "@/lib/supabase/config"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -21,7 +21,7 @@ type LoginValues = z.infer<typeof loginSchema>
 export function LoginForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const supabase = createClient()
+//   const supabase = createClient()
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -35,10 +35,12 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      })
+    //   const { data: authData, error } = await supabase.auth.signInWithPassword({
+    //     email: data.email,
+    //     password: data.password,
+    //   })
+    const authData = {session: null}
+    const error = null
 
       if (error) throw error
 
