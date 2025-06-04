@@ -5,11 +5,12 @@ export default async function AuthLayout({children,}: Readonly<{children: React.
     
     const resposne  = await getUser();
     if(resposne?.user){
-        redirect("/");
+        redirect("/dashboard");
     }
 
-    return 
-    <>
-        {children}
-    </>;
+    return (
+        <>
+            {children}
+        </>
+    );
 }

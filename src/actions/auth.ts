@@ -26,7 +26,7 @@ export async function signUp(formData: FormData){
     
     if(error){
         return {
-            status: error?.status,
+            status: error?.message,
             user: null,
         }
     } else if(data?.user?.identities?.length === 0){

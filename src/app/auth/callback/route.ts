@@ -34,21 +34,15 @@ export async function GET(request: Request) {
 
 
             if(!exsistingUser){
-                console.log("inserting user to user_profiles table with");
-                console.log("email", data?.user?.email);
-                console.log("usrname", data?.user?.user_metadata?.username);
-                console.log("data", data);
                 const { data: user, error: insertError } = await supabase.from("user_profiles").insert({
                     email: data?.user?.email,
                     username: data?.user?.user_metadata?.user_name,
                 });
 
                 if(insertError){
-                    console.error("error inserting user", insertError);
                     return NextResponse.redirect(`${origin}/error`);
                 }
 
-                console.log("user inserted");
             }
 
             const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer

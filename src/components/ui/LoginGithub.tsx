@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useTransition } from "react";
-import { Github } from "lucide-react";
+import { GithubIcon } from "lucide-react";
 import { signInWithOAuth } from "@/actions/auth";
 
 const LoginGithub = () => {
@@ -14,15 +14,15 @@ const LoginGithub = () => {
     };
 
     return (
-        <div
-        onClick={handleGithubLogin}
-        className="w-full gap-4 hover:cursor-pointer mt-6 h-12 bg-gray-800 rounded-md p-4 flex justify-center items-center"
+        <button
+            onClick={handleGithubLogin}
+            className="w-full h-12 border shadow border-gray-300 rounded-md p-3 flex justify-center items-center gap-3 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors bg-white"
         >
-        <Github className="text-white" />
-        <p className="text-white">
-            {isPending ? "Redirecting..." : "Login with Github"}
-        </p>
-        </div>
+            <GithubIcon />
+            <span className="text-gray-700 font-medium">
+                {isPending ? "Redirecting..." : "Continue with Github"}
+            </span>
+        </button>
     );
 };
 
